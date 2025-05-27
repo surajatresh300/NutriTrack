@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <title>Macro Calculator</title>
+   <style>
+      body {
+         font-family: 'Poppins', sans-serif;
+         background: linear-gradient(135deg, #2b5876, #4e4376);
+         /* Deep blue gradient */
+         margin: 0;
+         padding: 40px;
+         color: white;
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+      }
+
+      h2 {
+         font-size: 32px;
+         font-weight: 700;
+         margin-bottom: 30px;
+         text-align: center;
+         /* Title centered */
+         color: #ff6b6b;
+      }
+
+      .container {
+         display: flex;
+         flex-direction: column;
+         /* Stack elements vertically */
+         align-items: center;
+         max-width: 600px;
+         width: 100%;
+         gap: 20px;
+      }
+
+      .form-container,
+      .results-container {
+         width: 100%;
+         padding: 20px;
+         background: rgba(255, 255, 255, 0.85);
+         backdrop-filter: blur(15px);
+         border-radius: 16px;
+         box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+         transition: transform 0.3s ease, box-shadow 0.3s ease;
+         text-align: center;
+      }
+
+      .form-container:hover,
+      .results-container:hover {
+         transform: scale(1.05);
+         box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.3);
+      }
+
+      form {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+      }
+
+      input,
+      select {
+         width: 80%;
+         padding: 12px;
+         margin: 10px 0;
+         border: none;
+         border-radius: 8px;
+         font-size: 16px;
+         background: rgba(255, 255, 255, 0.5);
+         color: #333;
+         transition: background 0.3s ease;
+      }
+
+      input:focus,
+      select:focus {
+         background: rgba(255, 255, 255, 0.8);
+      }
+
+      button {
+         background: #ff6b6b;
+         color: white;
+         padding: 14px;
+         border: none;
+         border-radius: 10px;
+         font-size: 20px;
+         font-weight: 700;
+         cursor: pointer;
+         transition: background 0.3s ease, transform 0.3s ease;
+      }
+
+      button:hover {
+         background: #ff4757;
+         transform: scale(1.1);
+      }
+
+      .results-container {
+         min-height: 150px;
+         /* Ensures space for results */
+         font-size: 18px;
+         font-weight: 500;
+      }
+   </style>
+</head>
+
+<body>
+   <div class="container">
+      <h2>NutriTrack: Macro Calculator</h2>
+      <form id="macroForm">
+         <input type="number" class="plc" name="age" placeholder="Age" required>
+         <select name="gender" required>
+            <option value="">Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+         </select>
+         <input type="number" name="height" class="plc" placeholder="Height (cm)" required>
+         <input type="number" name="weight" class="plc" placeholder="Weight (kg)" required>
+         <select name="activity_level" required>
+            <option value="">Activity Level</option>
+            <option value="sedentary">Low</option>
+            <option value="moderate">Moderate</option>
+            <option value="active">High</option>
+         </select>
+         <select name="goal" required>
+            <option value="">Goal</option>
+            <option value="cutting">Weight Loss</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="bulking">Muscle Gain</option>
+         </select>
+         <button type="submit">Calculate</button>
+      </form>
+      <div class="results" id="results"></div>
+   </div>
+
+   <script>
+      const form = document.getElementById('macroForm');
+      const resultsDiv = document.getElementById('results');
+
+      form.addEventListener('submit', async (e) => {
+         e.preventDefault();
+         const formData = new FormData(form);
+         const data = Object.fromEntries(formData.entries());
+
+         try {
+            const response = await fetch('/predict', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+               resultsDiv.innerHTML = `
+            <p><strong>Protein:</strong> ${result.protein} g</p>
+            <p><strong>Carbs:</strong> ${result.carbs} g</p>
+            <p><strong>Fats:</strong> ${result.fats} g</p>
+            <p><strong>Water:</strong> ${result.water} L</p>
+          `;
+            } else {
+               resultsDiv.innerHTML = `<p style="color:red;">Error: ${result.error}</p>`;
+            }
+         } catch (err) {
+            resultsDiv.innerHTML = `<p style="color:red;">Something went wrong.</p>`;
+            console.error(err);
+         }
+      });
+   </script>
+</body>
+
+</html>
